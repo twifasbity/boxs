@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>awsd游玩</title>
+    <link rel="stylesheet" href="./1.css">
+</head>
+<body>
+    <div class="stage">
+        <div class="info">
+            <div class="newgame"><a href="">新游戏</a></div>
+        </div>
+        <div class="main">
+            <div class="cells wall" ></div>
+            <div class="cells wall" ></div>
+            <div class="cells wall" ></div>
+            <div class="cells wall" ></div>
+            <div class="cells wall" ></div>
+            <div class="cells wall" ></div>
+            <div class="cells wall" ></div>
+
+            <div class="cells wall"></div>
+            <div class="cells target"></div>
+            <div class="cells"></div>
+            <div class="cells target"></div>
+            <div class="cells target"></div>
+            <div class="cells target"></div>
+            <div class="cells wall"></div>
+
+            <div class="cells wall"></div>
+            <div class="cells"></div>
+            <div class="cells"><div class="box">箱</div></div>
+            <div class="cells"></div>
+            <div class="cells wall"></div>
+            <div class="cells"></div>
+            <div class="cells wall"></div>
+
+            <div class="cells wall"></div>
+            <div class="cells"><div class="box">箱</div></div>
+            <div class="cells wall"></div>
+            <div class="cells"><div class="box">箱</div></div>
+            <div class="cells"><div class="box">箱</div></div>
+            <div class="cells"></div>
+            <div class="cells wall"></div>
+
+            <div class="cells wall"></div>
+            <div class="cells"></div>
+            <div class="cells"></div>
+            <div class="cells"></div>
+            <div class="cells"></div>
+            <div class="cells"></div>
+            <div class="cells wall"></div>
+
+            <div class="cells wall"></div>
+            <div class="cells"></div>
+            <div class="cells"></div>
+            <div class="cells"></div>
+            <div class="cells wall"></div>
+            <div class="cells wall"></div>
+            <div class="cells wall"></div>
+
+            <div class="cells wall"></div>
+            <div class="cells wall"></div>
+            <div class="cells wall"></div>
+            <div class="cells wall"></div>
+            <div class="cells wall"></div>
+            <div class="cells"></div>
+            <div class="cells"></div>
+
+            <div id="p"></div>
+        </div>
+    </div>
+    <script>
+        const boxs=document.getElementsByClassName("box")
+        const human=document.getElementById("p")
+        const walls=document.getElementsByClassName("wall")
+        const targets=document.getElementsByClassName("target")
+
+        const keyArr=["A","W","D","S","a","s","w","d"]
+        const ban=[0,600,]
+        const targetX=[100,300,400,500]
+        const targetY=[100,100,100,100]
+
+        let px,py,tx,ty
+        let dir
+        let i
+        let wallX=[], wallY=[]
+
+        //获墙坐标
+        for(i=0;i<walls.length;i++){
+            wallX.push(walls[i].offsetLeft)
+            wallY.push(walls[i].offsetTop)
+        }
+
+        //定位箱子
+        {
+        boxs[0].style.top=200+"px"
+        boxs[0].style.left=200+"px"
+        boxs[1].style.top=300+"px"
+        boxs[1].style.left=100+"px"
+        boxs[2].style.top=300+"px"
+        boxs[2].style.left=300+"px"
+        boxs[3].style.top=300+"px"
+        boxs[3].style.left=400+"px"            
+        }
+
+        //定位target
+        {
+        targets[0].style.top=100+"px"
+        targets[1].style.top=100+"px"
+        targets[2].style.top=100+"px"
+        targets[3].style.top=100+"px"
+        targets[0].style.left=100+"px"
+        targets[1].style.left=300+"px"
+        targets[2].style.left=400+"px"
+        targets[3].style.left=500+"px"
+        }
+        //获取箱子坐标
+        function xbox(){
+            let bx=[],bi
+            for(bi=0;bi<4;bi++){
+                bx.push(boxs[bi].offsetLeft)
+            }
+            return bx
+        }
+        function ybox(){
+            let by=[],bi
+            for(bi=0;bi<4;bi++){
+                by.push(boxs[bi].offsetTop)
+            }
+            return by
+        }
+        
+        //碰撞检测
+        function Pound(px,py){
+            if(boxPound(px,py)||wallPound(px,py)){
+                return true
+            }
+            return false
+        }
+        function boxPound(px,py){
+            let bx=xbox()
+            let by=ybox()
+            for (let j = 0; j < walls.length; j++) {
+                if (bx[j] === px && by[j] === py) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        function wallPound(px,py){
+            for (let j = 0; j < walls.length; j++) {
+                if (wallX[j] === px && wallY[j] === py) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        //小黑球移动
+        function pmove(dir){
+            px=tx=human.offsetLeft
+            py=ty=human.offsetTop
+            switch(dir){
+                case "a":
+                    px-=100  
+                    if(wallPound(px,py)){
+                        px+=100
+                    }
+                    break
+                case "d":
+                    px+=100                     
+                    if(wallPound(px,py)){
+                        px-=100
+                    }
+                    break
+                case "w":
+                    py-=100
+                    if(wallPound(px,py)){
+                        py+=100
+                    }
+                    break
+                case "s":
+                    py+=100
+                    if(wallPound(px,py)){
+                        py-=100
+                    }
+            }
+            human.style.left=px+"px"
+            human.style.top=py+"px"
+        }
+
+        //箱子移动
+        function bmove(dir,x,y){
+            let bx=xbox()
+            let by=ybox()
+            switch(dir){
+                case "a":moveLeft(x,y,bx,by); break
+                case "d":moveRight(x,y,bx,by);break
+                case "w":moveTop(x,y,bx,by);break;
+                case "s":moveBottom(x,y,bx,by)
+            } 
+        }
+        function moveLeft(x,y,bx,by){
+            for(i=0;i<4;i++){
+                if(bx[i]===x&&by[i]===y){
+                bx[i]-=100
+                if(Pound(bx[i],by[i])){
+                        bx[i]+=100
+                        px=tx
+                        py=ty
+                    }
+                boxs[i].style.left=bx[i]+"px"
+                human.style.left=px+"px"
+                human.style.top=py+"px"
+                }
+            }
+        }
+        function moveRight(x,y,bx,by){
+            for(i=0;i<4;i++){
+                if(bx[i]===x&&by[i]===y){
+                bx[i]+=100
+                if(Pound(bx[i],by[i])){
+                        bx[i]-=100
+                        px=tx
+                        py=ty
+                    }
+                boxs[i].style.left=bx[i]+"px"
+                human.style.left=px+"px"
+                human.style.top=py+"px"
+                }
+            }
+        }
+        function moveTop(x,y,bx,by){
+            for(i=0;i<4;i++){
+                if(bx[i]===x&&by[i]===y){
+                by[i]-=100
+                if(Pound(bx[i],by[i])){
+                        by[i]+=100
+                        px=tx
+                        py=ty
+                    }
+                boxs[i].style.top=by[i]+"px"
+                human.style.left=px+"px"
+                human.style.top=py+"px"
+                }
+            }
+        }
+        function moveBottom(x,y,bx,by){
+            for(i=0;i<4;i++){
+                if(bx[i]===x&&by[i]===y){
+                by[i]+=100
+                if(Pound(bx[i],by[i])){
+                        by[i]-=100
+                        px=tx
+                        py=ty
+                    }
+                boxs[i].style.top=by[i]+"px"
+                human.style.left=px+"px"
+                human.style.top=py+"px"
+                }
+            }
+        }
+ 
+        document.addEventListener("keydown",(event)=>{
+            if(keyArr.includes(event.key)){
+                dir=event.key
+                pmove(dir)
+                bmove(dir,px,py)
+            }
+            let bx=xbox()
+            let by=ybox()
+            let a=[0,0,0,0]
+            for(let k=0;k<4;k++){
+                for(let g=0;g<4;g++){
+                    if(targetX[k]===bx[g] && targetY[k]===by[g]){
+                        a[k]=1
+                    }
+                }
+            }
+            if(a[0]&&a[1]&&a[2]&&a[3]){
+                alert("Gameover!")
+            }
+        })
+    </script>
+</body>
+</html>
